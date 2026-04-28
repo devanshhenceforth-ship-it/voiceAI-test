@@ -1,11 +1,16 @@
 {
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "npm run build && wrangler dev"
   },
   "dependencies": {
     "express": "^4.22.1",
     "gtts": "^0.2.1",
     "websocket": "^1.0.35",
     "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.85.0"
   }
 }
