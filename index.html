@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plivo Stream Gateway Tester</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f5f7fb;
+            --surface: #ffffff;
+            --surface-soft: #eef4ff;
+            --text: #182235;
+            --muted: #65748b;
+            --border: #d9e1ee;
+            --primary: #2563eb;
+            --primary-strong: #1d4ed8;
+            --success: #0f9f6e;
+            --warning: #c78512;
+            --danger: #c24141;
+            --console: #0f1728;
+            --shadow: 0 16px 40px rgba(19, 30, 54, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+            color: var(--text);
+        }
+
+        .page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 28px 18px 40px;
+        }
+
+        .hero {
+            margin-bottom: 22px;
+        }
+
+        .hero h1 {
+            margin: 0 0 10px;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            line-height: 1.05;
+        }
+
+        .hero p {
+            margin: 0;
+            max-width: 780px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .stack {
+            display: grid;
+            gap: 18px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .panel-body {
+            padding: 18px;
+        }
+
+        .heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .heading h2 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 32px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: #f4f7fc;
+            color: var(--muted);
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .status-badge[data-tone="connecting"] {
+            color: var(--warning);
+            border-color: rgba(199, 133, 18, 0.26);
+            background: rgba(199, 133, 18, 0.12);
+        }
+
+        .status-badge[data-tone="live"] {
+            color: var(--success);
+            border-color: rgba(15, 159, 110, 0.26);
+            background: rgba(15, 159, 110, 0.12);
+        }
+
+        .status-badge[data-tone="warning"] {
+            color: var(--warning);
+            border-color: rgba(199, 133, 18, 0.26);
+            background: rgba(199, 133, 18, 0.12);
+        }
+
+        .status-badge[data-tone="error"] {
+            color: var(--danger);
+            border-color: rgba(194, 65, 65, 0.26);
+            background: rgba(194, 65, 65, 0.12);
+        }
+
+        .meta {
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        label {
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        input[type="file"] {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font: inherit;
+            color: var(--text);
+            background: #fff;
+        }
+
+        input:focus {
+            outline: 2px solid rgba(37, 99, 235, 0.16);
+            outline-offset: 1px;
+            border-color: rgba(37, 99, 235, 0.45);
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .info-box {
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface-soft);
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        button {
+            min-height: 44px;
+            padding: 0 14px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: var(--primary);
+            color: #fff;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.18s ease, opacity 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--primary-strong);
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .secondary {
+            background: #fff;
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .secondary:hover:not(:disabled) {
+            background: #f7f9fc;
+        }
+
+        .danger {
+            background: var(--danger);
+        }
+
+        .danger:hover:not(:disabled) {
+            background: #a53535;
+        }
+
+        .console {
+            min-height: 620px;
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 18px 0;
+        }
+
+        .console-header h2 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .console-tools {
+            display: grid;
+            grid-template-columns: repeat(2, max-content);
+            gap: 10px;
+        }
+
+        .audio-panel {
+            margin: 0 18px 18px;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #f8fbff;
+        }
+
+        .audio-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .audio-panel-header h3 {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .audio-meta {
+            margin: 0 0 10px;
+            color: var(--muted);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .audio-player {
+            width: 100%;
+        }
+
+        .output {
+            margin: 16px 18px 18px;
+            min-height: 520px;
+            max-height: 72vh;
+            overflow: auto;
+            padding: 16px;
+            border-radius: 8px;
+            background: var(--console);
+            color: #d6e4ff;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            font-size: 0.92rem;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .log {
+            margin-bottom: 10px;
+        }
+
+        .log-system {
+            color: #9cb1d6;
+        }
+
+        .log-success {
+            color: #74e2a2;
+        }
+
+        .log-warning {
+            color: #ffd36f;
+        }
+
+        .log-error {
+            color: #ff9d9d;
+        }
+
+        @media (max-width: 920px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                padding-inline: 14px;
+            }
+
+            .two-col,
+            .actions,
+            .console-tools {
+                grid-template-columns: 1fr;
+            }
+
+            .heading,
+            .console-header {
+                flex-direction: column;
+                align-items: start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+        <section class="hero">
+            <h1>Plivo Stream Gateway Tester</h1>
+            <p>
+                This browser client is shaped to match your NestJS `PlivoStreamGateway`: it sends Plivo-style
+                `start`, `media`, and `stop` events, and it listens for `playAudio` and `clearAudio` responses from
+                the Sarvam-backed voice pipeline.
+            </p>
+        </section>
+
+        <section class="layout">
+            <div class="stack">
+                <div class="panel" id="authPanel">
+                    <div class="panel-body">
+                        <div class="heading">
+                            <h2>Connection</h2>
+                            <span id="statusBadge" class="status-badge" data-tone="idle">Ready</span>
+                        </div>
+
+                        <div id="sessionMeta" class="meta"></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-body grid">
+                        <div class="heading">
+                            <h2>Step 1: Login</h2>
+                        </div>
+
+                        <div class="two-col">
+                            <div class="field">
+                                <label for="emailInput">Email</label>
+                                <input id="emailInput" type="text" placeholder="login email" />
+                            </div>
+
+                            <div class="field">
+                                <label for="passwordInput">Password</label>
+                                <input id="passwordInput" type="password" placeholder="login password" />
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>Login first</strong>
+                            <p>Without a token the stream buttons stay locked. Enter your credentials here and the client will manage the token, session, and websocket flow internally.</p>
+                        </div>
+
+                        <div class="actions">
+                            <button id="loginBtn" class="secondary" onclick="login()">Login & Save Token</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-body grid">
+                        <div class="heading">
+                            <h2>Step 2: Destination</h2>
+                        </div>
+
+                        <div class="field">
+                            <label for="toInput">To number</label>
+                            <input id="toInput" type="text" value="+919999999999" placeholder="Destination phone number" />
+                            <div class="hint">This is the only call detail you need to enter. Session, call metadata, and websocket setup are handled internally.</div>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>Internal flow</strong>
+                            <p>Login → create session → fetch stream config → open websocket → send audio.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-body grid">
+                        <div class="heading">
+                            <h2>Step 3: Stream</h2>
+                        </div>
+
+                        <div class="hint">Use this to mimic a caller speaking into the Plivo stream in real time.</div>
+
+                        <div class="actions">
+                            <button id="startMicBtn" onclick="start()">Start Microphone</button>
+                            <button id="stopBtn" class="danger" onclick="stop()" disabled>Stop Session</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-body grid">
+                        <div class="heading">
+                            <h2>File Stream</h2>
+                        </div>
+
+                        <div class="field">
+                            <label for="fileInput">Local audio or MP4 file</label>
+                            <input id="fileInput" type="file" accept="audio/*,video/mp4" />
+                            <div id="fileName" class="hint">No file selected</div>
+                        </div>
+
+                        <div class="actions">
+                            <button id="startFileBtn" onclick="startFile()" disabled>Stream File</button>
+                            <button id="downloadAudioBtn" class="secondary" onclick="downloadAudio()" disabled>Download
+                                Mixed Audio</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel console">
+                <div class="console-header">
+                    <div>
+                        <h2>Gateway Event Log</h2>
+                        <div class="hint">Useful for verifying the full STT/TTS round trip while you test the backend.
+                        </div>
+                    </div>
+                    <div class="console-tools">
+                        <button id="clearLogBtn" class="secondary" onclick="clearLog()">Clear Log</button>
+                    </div>
+                </div>
+
+                <div class="audio-panel">
+                    <div class="audio-panel-header">
+                        <h3>Received Audio Playback</h3>
+                        <button id="downloadReceivedAudioBtn" class="secondary" onclick="downloadReceivedAudio()"
+                            disabled>Download WAV</button>
+                    </div>
+                    <div id="receivedAudioMeta" class="audio-meta">No received audio yet</div>
+                    <audio id="receivedAudioPlayer" class="audio-player" controls preload="metadata"></audio>
+                </div>
+
+                <div id="output" class="output" aria-live="polite"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
